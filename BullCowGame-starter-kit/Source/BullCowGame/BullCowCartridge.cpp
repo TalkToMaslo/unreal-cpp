@@ -90,7 +90,7 @@ void UBullCowCartridge::ProcessGuess(const FString& Guess)
     // Guess has incorrect length
     else if (Guess.Len() != HiddenWord.Len())
     {
-        PrintLine(TEXT("Wrong answer. Your guess is a %i letter isogram. \nThe hidden word is a %i letter isogram."), Guess.Len(), HiddenWord.Len());
+        PrintLine(TEXT("Wrong answer. Your guess is a %i letter word. \nThe hidden word is a %i letter isogram."), Guess.Len(), HiddenWord.Len());
     }
     
     // Guess has correct length but is not an isogram
