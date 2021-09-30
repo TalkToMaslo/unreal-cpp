@@ -51,8 +51,8 @@ void UBullCowCartridge::SetGameParams()
     }
     while(HiddenWord.Len() < 4 || !IsIsogram(HiddenWord));
     
-    // Debug line: remove during production
-    PrintLine(HiddenWord);
+    // Debug line
+    // PrintLine(HiddenWord);
     
     // Set number of lives
     Lives = HiddenWord.Len();
