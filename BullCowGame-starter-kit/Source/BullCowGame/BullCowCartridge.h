@@ -12,24 +12,27 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	GENERATED_BODY()
 
 	public:
+    const void PrintWelcomeMessage();
 	virtual void BeginPlay() override;
+    void loadWords();
 	virtual void OnInput(const FString& Input) override;
     void ProcessGuess(const FString& Input);
     void SetGameParams();
-    void PrintHiddenWordLength();
-    void PrintLives();
+    const void PrintHiddenWordLength();
+    const void PrintLives();
     void PlayGame();
-    bool IsIsogram(FString Word);
-    void CountBullsCows();
+    const bool IsIsogram(const FString& Word);
+    const void CountBullsCows(const FString& Input);
     void GameOver();
     void PlayAgain();
-    void PrintExitMessage();
+    const void PrintExitMessage();
 
 	// Your declarations go below!
 	private:
+    bool FirstGame = true;
     FString HiddenWord;
     int32 Lives;
     int32 Bulls, Cows;
     bool WonGame;
-    FString ArrayOfWords[] = {"cake", "egypt", "sword", "lumber", "trouble", "playground", "country", "mango", "siphon", "germanic" , "ambidextrous"};
+    TArray<FString> HiddenWordOptions;
 };

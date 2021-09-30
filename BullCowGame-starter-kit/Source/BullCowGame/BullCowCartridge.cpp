@@ -4,7 +4,12 @@
 void UBullCowCartridge::BeginPlay()
 {
     
-    Super::BeginPlay();
+    if (FirstGame) {
+        Super::BeginPlay();
+        
+        // load in words
+        loadWords();
+    }
     
     // Set word and lives
     SetGameParams();
@@ -15,56 +20,62 @@ void UBullCowCartridge::BeginPlay()
     PrintHiddenWordLength();
     
     // Start playing
-    PlayGame();
 }
 
 // After a player guess
 void UBullCowCartridge::OnInput(const FString& Input)
 {
-    ClearScreen();
-        
-    ProcessGuess(Input);
+    
+    // During gameplay
+    if (Lives > 0 && !WonGame)
+    {
+        ClearScreen();
+        ProcessGuess(Input);
+    }
+    
+    // Outside gameplay
+    else
+    {
+        PlayAgain();
+    }
 }
 
 void UBullCowCartridge::SetGameParams()
 {
-    srand(TIME(NULL));
     WonGame = false;
-    HiddenWord = ArrayOfWords[rand() % 12];
+    
+    // Select hidden word
+    do
+    {
+        HiddenWord = HiddenWordOptions[FMath::RandRange(0, HiddenWordOptions.Num())];
+    }
+    while(HiddenWord.Len() < 4 || !IsIsogram(HiddenWord));
+    
+    // Debug line: remove during production
+    PrintLine(HiddenWord);
+    
+    // Set number of lives
     Lives = HiddenWord.Len();
 }
 
-// Controls game duration
-void UBullCowCartridge::PlayGame()
-{
-    while (Lives > 0 && !WonGame)
-    {
-        FString UserGuess;
-        cin >> UserGuess;
-        OnInput(UserGuess);
-    }
-    
-    GameOver();
-}
-
-void UBullCowCartridge::PrintWelcomeMessage()
+const void UBullCowCartridge::PrintWelcomeMessage()
 {
     PrintLine(TEXT("Welcome to the bull cow game!"));
 }
 
-void UBullCowCartridge::PrintLives()
+const void UBullCowCartridge::PrintLives()
 {
-    PrintLine(FString::Printf(TEXT("+ You have %i lives"), Lives));
+    PrintLine(FString::Printf(TEXT("+ You have %i lives left."), Lives));
 }
 
-void UBullCowCartridge::PrintHiddenWordLength()
+const void UBullCowCartridge::PrintHiddenWordLength()
 {
     PrintLine(FString::Printf(TEXT("+ Guess the %i letter isogram..."), HiddenWord.Len()));
 }
 
-void UBullCowCartridge::PrintExitMessage()
+const void UBullCowCartridge::PrintExitMessage()
 {
-    PrintLine(TEXT("We hope you enjoyed playing the bull cow game!"));
+    PrintLine(TEXT("We hope you enjoyed playing the Bull & Cow game! Press enter to play again..."));
 }
 
 void UBullCowCartridge::ProcessGuess(const FString& Guess)
@@ -73,18 +84,19 @@ void UBullCowCartridge::ProcessGuess(const FString& Guess)
     if (Guess == HiddenWord)
     {
         WonGame = true;
+        GameOver();
     }
     
-    // Guess is not an isogram
-    else if (!IsIsogram(Guess))
-    {
-        PrintLine(TEXT("Wrong answer. Your guess is not an isogram. \nThe hidden word is a %i letter isogram: it has no repeated letters."), HiddenWord.Len());
-    }
-    
-    // Guess is an isogram but incorrect length
+    // Guess has incorrect length
     else if (Guess.Len() != HiddenWord.Len())
     {
         PrintLine(TEXT("Wrong answer. Your guess is a %i letter isogram. \nThe hidden word is a %i letter isogram."), Guess.Len(), HiddenWord.Len());
+    }
+    
+    // Guess has correct length but is not an isogram
+    else if (!IsIsogram(Guess))
+    {
+        PrintLine(TEXT("Wrong answer. Your guess is not an isogram. \nThe hidden word is a %i letter isogram: it has no repeated letters."), HiddenWord.Len());
     }
     
     // Guess is correct length but wrong word
@@ -96,22 +108,26 @@ void UBullCowCartridge::ProcessGuess(const FString& Guess)
         // Remaining lives
         if (Lives > 0)
         {
-            // count bulls/cows
-            CountBullsCows();
+            // count bulls and cows
+            CountBullsCows(Guess);
             
             // show lives left
             PrintLives();
         }
+        
+        else {
+            GameOver();
+        }
     }
 }
 
-bool UBullCowCartridge::IsIsogram(FString Word)
+const bool UBullCowCartridge::IsIsogram(const FString& Word)
 {
 
-    for (int LetterPos = 0; LetterPos < Word.Len(); LetterPos++)
+    for (int32 LetterPos = 0; LetterPos < Word.Len(); LetterPos++)
     {
         
-        for (int OtherLetterPos = LetterPos + 1; OtherLetterPos < Word.Len(); OtherLetterPos++)
+        for (int32 OtherLetterPos = LetterPos + 1; OtherLetterPos < Word.Len(); OtherLetterPos++)
         {
             
             // same letter found twice
@@ -127,54 +143,71 @@ bool UBullCowCartridge::IsIsogram(FString Word)
     return true;
 }
 
-void UBullCowCartridge::CountBullsCows()
+const void UBullCowCartridge::CountBullsCows(const FString& Guess)
 {
-    // count bulls
-    Bulls =
+    // count bulls (same letter at same index) and cows (same letter at different index)
+    Bulls = 0, Cows = 0;
+    for (int GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
+    {
+        
+        // Same letter at same index
+        if (Guess[GuessIndex] == HiddenWord[GuessIndex])
+        {
+            Bulls++;
+        }
+        
+        // Different letter at same index
+        else
+        {
+            // Check rest of HiddenWord for same letter
+            for (int HiddenWordIndex = 0; HiddenWordIndex < HiddenWord.Len(); HiddenWordIndex++)
+            {
+                // Same letter at different index
+                if (Guess[GuessIndex] == HiddenWord[HiddenWordIndex])
+                {
+                    Cows++;
+                }
+            }
+        }
+    }
     
-    // count cows
-    Cows =
     
     // Print result
-    PrintLine(FString::Printf(TEXT("You had %i bulls and %i cows."), Bulls, Cows));
-    
+    PrintLine(FString::Printf(TEXT("You had %i bull(s) and %i cow(s)."), Bulls, Cows));
 }
 
 void UBullCowCartridge::GameOver()
 {
     
+    // Game won
     if (WonGame)
     {
         PrintLine(TEXT("You won the game!"));
     }
     
+    // Game lost
     else
     {
-        
         PrintLine(TEXT("You lost the game!"));
     
         PrintLine(FString::Printf(TEXT("The word was: %s"), *HiddenWord));
     }
     
-    PlayAgain();
-        
+    // Game ended
+    PrintExitMessage();
 }
 
 void UBullCowCartridge::PlayAgain()
 {
-    PrintLine(TEXT("Do you want to play again?"));
-    
-    //if yes play again
-    if ()
-    {
-        ClearScreen();
-        BeginPlay();
-    }
-    
-    //if no exit
-    else
-    {
-        PrintExitMessage();
-    }
+    // New game
+    ClearScreen();
+    FirstGame = false;
+    BeginPlay();
 }
 
+void UBullCowCartridge::loadWords() {
+        
+    const FString WordListPath = FPaths::ProjectContentDir() / TEXT("WordList/HiddenWordList.txt");
+    
+    FFileHelper::LoadFileToStringArray(HiddenWordOptions, *WordListPath);
+}
