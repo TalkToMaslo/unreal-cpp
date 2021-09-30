@@ -58,22 +58,22 @@ void UBullCowCartridge::SetGameParams()
     Lives = HiddenWord.Len();
 }
 
-const void UBullCowCartridge::PrintWelcomeMessage()
+void UBullCowCartridge::PrintWelcomeMessage() const
 {
     PrintLine(TEXT("Welcome to the bull cow game!"));
 }
 
-const void UBullCowCartridge::PrintLives()
+void UBullCowCartridge::PrintLives() const
 {
     PrintLine(FString::Printf(TEXT("+ You have %i lives left."), Lives));
 }
 
-const void UBullCowCartridge::PrintHiddenWordLength()
+void UBullCowCartridge::PrintHiddenWordLength() const
 {
     PrintLine(FString::Printf(TEXT("+ Guess the %i letter isogram..."), HiddenWord.Len()));
 }
 
-const void UBullCowCartridge::PrintExitMessage()
+void UBullCowCartridge::PrintExitMessage() const
 {
     PrintLine(TEXT("We hope you enjoyed playing the Bull & Cow game! Press enter to play again..."));
 }
@@ -121,7 +121,7 @@ void UBullCowCartridge::ProcessGuess(const FString& Guess)
     }
 }
 
-const bool UBullCowCartridge::IsIsogram(const FString& Word)
+bool UBullCowCartridge::IsIsogram(const FString& Word) const
 {
 
     for (int32 LetterPos = 0; LetterPos < Word.Len(); LetterPos++)
@@ -143,10 +143,10 @@ const bool UBullCowCartridge::IsIsogram(const FString& Word)
     return true;
 }
 
-const void UBullCowCartridge::CountBullsCows(const FString& Guess)
+void UBullCowCartridge::CountBullsCows(const FString& Guess) const
 {
     // count bulls (same letter at same index) and cows (same letter at different index)
-    Bulls = 0, Cows = 0;
+    int32 Bulls = 0, Cows = 0;
     for (int GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
     {
         
