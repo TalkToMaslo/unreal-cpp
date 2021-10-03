@@ -166,6 +166,7 @@ void UBullCowCartridge::CountBullsCows(const FString& Guess) const
                 if (Guess[GuessIndex] == HiddenWord[HiddenWordIndex])
                 {
                     Cows++;
+                    break;
                 }
             }
         }
