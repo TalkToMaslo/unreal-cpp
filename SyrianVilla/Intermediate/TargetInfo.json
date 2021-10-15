@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "SyrianVilla",
+			"Path": "/Users/kbgazzaz/Desktop/unreal-cpp/SyrianVilla/Source/SyrianVilla.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "SyrianVillaEditor",
+			"Path": "/Users/kbgazzaz/Desktop/unreal-cpp/SyrianVilla/Source/SyrianVillaEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
