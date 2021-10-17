@@ -1,27 +1,21 @@
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "OpenDoor.h"
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+    PrimaryComponentTick.bCanEverTick = true;
 }
-
 
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
     
-    DoorInitialRotation = GetOwner()->GetActorRotation();
-    DoorCurrentRotation = DoorInitialRotation;
-    DoorTargetRotation(DoorInitialRotation.Roll, DoorInitialRotation.Yaw + 70.f, DoorInitialRotation.Pitch);
-
-	// ...
-	
+    InitializeRotations();
+    CheckPressurePlatesExist();
+    SetActorThatOpensDoor();
 }
 
 
@@ -30,9 +24,56 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     
-    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorTargetRotation, DeltaTime, 45);
-    GetOwner()->SetActorRotation(DoorCurrentRotation);
-
-	// ...
+    CheckDoorStatus(DeltaTime);
 }
+
+
+void UOpenDoor::InitializeRotations()
+{
+    DoorInitialRotation = GetOwner()->GetActorRotation();
+    DoorCurrentRotation = DoorInitialRotation;
+    DoorTargetRotation = {DoorInitialRotation.Roll, DoorInitialRotation.Yaw + DoorTargetYaw, DoorInitialRotation.Pitch};
+}
+
+
+void UOpenDoor::CheckPressurePlatesExist() {
+    if (!PressurePlate)
+    
+    {
+            UE_LOG(LogTemp, Error, TEXT("%s has an OpenDoor component but does not have a pressure plate set"), *GetOwner()->GetName())
+    }
+}
+
+
+void UOpenDoor::SetActorThatOpensDoor() {
+    ActorThatOpensDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
+}
+
+
+void UOpenDoor::CheckDoorStatus(float DeltaTime)
+{
+    if (PressurePlate && PressurePlate->IsOverlappingActor(ActorThatOpensDoor))
+    {
+        OpenADoor(DeltaTime);
+        DoorLastOpened = GetWorld()->GetTimeSeconds();
+    }
+    
+    else if (PressurePlate && !PressurePlate->IsOverlappingActor(ActorThatOpensDoor) &&  GetWorld()->GetTimeSeconds() - DoorLastOpened > DoorCloseDelay)
+    {
+        CloseADoor(DeltaTime);
+    }
+}
+
+void UOpenDoor::OpenADoor(float DeltaTime)
+{
+    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorTargetRotation, DeltaTime, 30);
+    GetOwner()->SetActorRotation(DoorCurrentRotation);
+}
+
+void UOpenDoor::CloseADoor(float DeltaTime)
+{
+    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorInitialRotation, DeltaTime, 45);
+    GetOwner()->SetActorRotation(DoorCurrentRotation);
+}
+
 
