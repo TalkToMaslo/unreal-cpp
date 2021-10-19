@@ -18,7 +18,6 @@ void UOpenDoor::BeginPlay()
     SetActorThatOpensDoor();
 }
 
-
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -66,13 +65,13 @@ void UOpenDoor::CheckDoorStatus(float DeltaTime)
 
 void UOpenDoor::OpenADoor(float DeltaTime)
 {
-    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorTargetRotation, DeltaTime, 30);
+    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorTargetRotation, DeltaTime, DoorOpenSpeed);
     GetOwner()->SetActorRotation(DoorCurrentRotation);
 }
 
 void UOpenDoor::CloseADoor(float DeltaTime)
 {
-    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorInitialRotation, DeltaTime, 45);
+    DoorCurrentRotation = FMath::RInterpConstantTo(DoorCurrentRotation, DoorInitialRotation, DeltaTime, DoorCloseSpeed);
     GetOwner()->SetActorRotation(DoorCurrentRotation);
 }
 
