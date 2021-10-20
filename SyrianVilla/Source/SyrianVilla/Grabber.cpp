@@ -1,7 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Grabber.h"
+
+#define OUT
 
 // Sets default values for this component's properties
 UGrabber::UGrabber()
@@ -29,6 +30,23 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	// Get player's viewpoint
+    FVector PlayerViewLocation;
+    FRotator PlayerViewRotation;
+    
+    GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+        OUT PlayerViewLocation,
+        OUT PlayerViewRotation);
+    
+    UE_LOG(LogTemp, Log, TEXT("Location: %s, Rotation: %s"),
+           *PlayerViewLocation.ToString(),
+           *PlayerViewRotation.ToString()
+           );
+    
+    // Ray cast reach
+    
+    
+    // See what it hits
+    
 }
 

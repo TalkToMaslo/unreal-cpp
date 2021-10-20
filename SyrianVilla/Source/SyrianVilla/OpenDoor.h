@@ -38,8 +38,8 @@ private:
     AActor* ActorThatOpensDoor;
     
     UPROPERTY(EditAnywhere);
-    float DoorOpenSpeed;
+    float DoorOpenSpeed = 30.f;
     
     UPROPERTY(EditAnywhere);
-    float DoorCloseSpeed;
+    float DoorCloseSpeed = 45.f;
 };
