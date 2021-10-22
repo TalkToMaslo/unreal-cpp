@@ -1,4 +1,5 @@
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "Grabber.h"
 
@@ -38,15 +39,31 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
         OUT PlayerViewLocation,
         OUT PlayerViewRotation);
     
-    UE_LOG(LogTemp, Log, TEXT("Location: %s, Rotation: %s"),
-           *PlayerViewLocation.ToString(),
-           *PlayerViewRotation.ToString()
-           );
-    
     // Ray cast reach
-    
+    FVector LineTraceEndPoint = PlayerViewLocation + PlayerViewRotation.Vector() * Reach;
+    DrawDebugLine(GetWorld(), PlayerViewLocation, LineTraceEndPoint, FColor(0,255,0), false, 0.f, 0, 5.f);
     
     // See what it hits
+    FHitResult Hit;
     
+    FCollisionQueryParams TraceParams(
+        FName(TEXT("")),
+        false,
+        GetOwner()
+    );
+    
+    GetWorld()->LineTraceSingleByObjectType(
+        OUT Hit,
+        PlayerViewLocation,
+        LineTraceEndPoint,
+        FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+        TraceParams
+    );
+    
+    AActor* ActorHit = Hit.GetActor();
+    
+    if (ActorHit){
+        UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *(ActorHit->GetName()));
+    }
 }
 
